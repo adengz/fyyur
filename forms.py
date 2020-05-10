@@ -1,7 +1,7 @@
 from datetime import datetime
-from flask_wtf import Form
+from flask_wtf import FlaskForm
 from wtforms import StringField, SelectField, SelectMultipleField, DateTimeField, BooleanField
-from wtforms.validators import DataRequired, AnyOf, URL
+from wtforms.validators import DataRequired, AnyOf, URL, Regexp, Optional
 
 
 _states = [
@@ -84,15 +84,15 @@ _genres = [
 NAME = StringField('name', validators=[DataRequired()])
 CITY = StringField('city', validators=[DataRequired()])
 STATE = SelectField('state', validators=[DataRequired()], choices=_states)
-PHONE = StringField('phone', validators=[DataRequired()])
+PHONE = StringField('phone', validators=[DataRequired(), Regexp(r'\d{10}')])
 GENRES = SelectMultipleField('genres', validators=[DataRequired()],choices= _genres)
-IMAGE_LINK = StringField('image_link')
-WEBSITE = StringField('website', validators=[URL()])
-FB_LINK = StringField('facebook_link', validators=[URL()])
+IMAGE_LINK = StringField('image_link', validators=[Optional(), URL()])
+WEBSITE = StringField('website', validators=[Optional(), URL()])
+FB_LINK = StringField('facebook_link', validators=[Optional(), URL()])
 SEEK_DESC = StringField('seeking_description')
 
 
-class ShowForm(Form):
+class ShowForm(FlaskForm):
     artist_id = StringField(
         'artist_id'
     )
@@ -105,7 +105,7 @@ class ShowForm(Form):
         default= datetime.today()
     )
 
-class VenueForm(Form):
+class VenueForm(FlaskForm):
     name = NAME
     city = CITY
     state = STATE
@@ -118,7 +118,7 @@ class VenueForm(Form):
     seeking = BooleanField('seeking_talent')
     seeking_description = SEEK_DESC
 
-class ArtistForm(Form):
+class ArtistForm(FlaskForm):
     name = NAME
     city = CITY
     state = STATE
