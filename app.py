@@ -26,6 +26,9 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 CSRFProtect(app)
 
+def format_phone(value):
+    return '-'.join(re.findall(r'\(?(\d{3})\)?[ -]?(\d{3})-?(\d{4})', value)[0])
+
 
 #----------------------------------------------------------------------------#
 # Models.
@@ -79,9 +82,6 @@ class Show(db.Model):
 # Filters.
 #----------------------------------------------------------------------------#
 
-def format_phone(value):
-    return '-'.join(re.findall(r'\(?(\d{3})\)?[ -]?(\d{3})-?(\d{4})', value)[0])
-
 def format_datetime(value, format='medium'):
   date = dateutil.parser.parse(value)
   if format == 'full':
@@ -118,18 +118,14 @@ def venues():
 
 @app.route('/venues/search', methods=['POST'])
 def search_venues():
-  # TODO: implement search on artists with partial string search. Ensure it is case-insensitive.
-  # seach for Hop should return "The Musical Hop".
-  # search for "Music" should return "The Musical Hop" and "Park Square Live Music & Coffee"
-  response={
-    "count": 1,
-    "data": [{
-      "id": 2,
-      "name": "The Dueling Pianos Bar",
-      "num_upcoming_shows": 0,
-    }]
-  }
-  return render_template('pages/search_venues.html', results=response, search_term=request.form.get('search_term', ''))
+    search_term = request.form.get('search_term', '')
+    response = {'data': []}
+    for venue in Venue.query.with_entities(Venue.id, Venue.name).filter(Venue.name.like('%{}%'.format(search_term))).all():
+        d = {'id': venue.id, 'name': venue.name}
+        d['num_upcoming_shows'] = len(Show.query.filter_by(venue_id=venue.id).filter(Show.start_time>=datetime.now()).all())
+        response['data'].append(d)
+    response['count'] = len(response['data'])
+    return render_template('pages/search_venues.html', results=response, search_term=search_term)
 
 @app.route('/venues/<int:venue_id>')
 def show_venue(venue_id):
@@ -209,18 +205,14 @@ def artists():
 
 @app.route('/artists/search', methods=['POST'])
 def search_artists():
-  # TODO: implement search on artists with partial string search. Ensure it is case-insensitive.
-  # seach for "A" should return "Guns N Petals", "Matt Quevado", and "The Wild Sax Band".
-  # search for "band" should return "The Wild Sax Band".
-  response={
-    "count": 1,
-    "data": [{
-      "id": 4,
-      "name": "Guns N Petals",
-      "num_upcoming_shows": 0,
-    }]
-  }
-  return render_template('pages/search_artists.html', results=response, search_term=request.form.get('search_term', ''))
+    search_term = request.form.get('search_term', '')
+    response = {'data': []}
+    for artist in Artist.query.with_entities(Artist.id, Artist.name).filter(Artist.name.like('%{}%'.format(search_term))).all():
+        d = {'id': artist.id, 'name': artist.name}
+        d['num_upcoming_shows'] = len(Show.query.filter_by(artist_id=artist.id).filter(Show.start_time>=datetime.now()).all())
+        response['data'].append(d)
+    response['count'] = len(response['data'])
+    return render_template('pages/search_artists.html', results=response, search_term=search_term)
 
 @app.route('/artists/<int:artist_id>')
 def show_artist(artist_id):
