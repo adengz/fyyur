@@ -13,6 +13,7 @@ from flask_wtf.csrf import CSRFProtect
 import logging
 from logging import Formatter, FileHandler
 from forms import ShowForm, VenueForm, ArtistForm
+import re
 #----------------------------------------------------------------------------#
 # App Config.
 #----------------------------------------------------------------------------#
@@ -76,6 +77,9 @@ class Show(db.Model):
 #----------------------------------------------------------------------------#
 # Filters.
 #----------------------------------------------------------------------------#
+
+def format_phone(value):
+    return '-'.join(re.findall(r'\(?(\d{3})\)?[ -]?(\d{3})-?(\d{4})', value)[0])
 
 def format_datetime(value, format='medium'):
   date = dateutil.parser.parse(value)
@@ -235,20 +239,28 @@ def create_venue_form():
 
 @app.route('/venues/create', methods=['POST'])
 def create_venue_submission():
+    venue = Venue()
     form = VenueForm()
-    if form.validate_on_submit():
-        print('form valid')
+    if not form.validate_on_submit():
+        flash('Invalid value found in ' + ', '.join(form.errors.keys()) + ' field(s).')
+        return render_template('forms/new_venue.html', form=form)
     else:
-        print(form.errors)
-  # TODO: insert form data as a new Venue record in the db, instead
-  # TODO: modify data to be the data object returned from db insertion
-
-  # on successful db insert, flash success
-  # flash('Venue ' + request.form['name'] + ' was successfully listed!')
-  # TODO: on unsuccessful db insert, flash an error instead.
-  # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
-  # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
-    return None
+        error = False
+        try:
+            form.populate_obj(venue)
+            venue.phone = format_phone(venue.phone)
+            db.session.add(venue)
+            db.session.commit()
+        except:
+            error = True
+            db.session.rollback()
+        finally:
+            db.session.close()
+        if error:
+            flash('An error occurred. Venue ' + venue.name + ' could not be listed.')
+        else:
+            flash('Venue ' + request.form['name'] + ' was successfully listed!')
+        return redirect(url_for('index'))
 
 @app.route('/venues/<venue_id>', methods=['DELETE'])
 def delete_venue(venue_id):

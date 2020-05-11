@@ -84,8 +84,14 @@ _genres = [
 NAME = StringField('name', validators=[DataRequired()])
 CITY = StringField('city', validators=[DataRequired()])
 STATE = SelectField('state', validators=[DataRequired()], choices=_states)
-PHONE = StringField('phone', validators=[DataRequired(), Regexp(r'\d{10}')])
-GENRES = SelectMultipleField('genres', validators=[DataRequired()],choices= _genres)
+PHONE = StringField(
+    'phone',
+    validators=[
+        DataRequired(),
+        Regexp(r'\(?\d{3}\)?[ -]?\d{3}-?\d{4}')
+    ]
+)
+GENRES = SelectMultipleField('genres', validators=[DataRequired()], choices= _genres)
 IMAGE_LINK = StringField('image_link', validators=[Optional(), URL()])
 WEBSITE = StringField('website', validators=[Optional(), URL()])
 FB_LINK = StringField('facebook_link', validators=[Optional(), URL()])
