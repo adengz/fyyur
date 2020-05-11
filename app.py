@@ -108,9 +108,11 @@ def index():
 def venues():
     areas = []
     for city, state in Venue.query.with_entities(Venue.city, Venue.state).distinct().all():
-        d = {'city': city, 'state': state}
-        d['venues'] = Venue.query.with_entities(Venue.id, Venue.name).filter_by(city=city, state=state).order_by(Venue.id).all()
-        d['num_upcoming_shows'] = 0  # TODO
+        d = {'city': city, 'state': state, 'venues': []}
+        for venue in Venue.query.with_entities(Venue.id, Venue.name).filter_by(city=city, state=state).order_by(Venue.id).all():
+            dv = {'id': venue.id, 'name': venue.name}
+            dv['num_upcoming_shows'] = len(Show.query.filter_by(venue_id=venue.id).filter(Show.start_time>=datetime.now()).all())
+            d['venues'].append(dv)
         areas.append(d)
     return render_template('pages/venues.html', areas=areas)
 
