@@ -91,7 +91,7 @@ PHONE = StringField(
         Regexp(r'\(?\d{3}\)?[ -]?\d{3}-?\d{4}')
     ]
 )
-GENRES = SelectMultipleField('genres', validators=[DataRequired()], choices= _genres)
+GENRES = SelectMultipleField('genres', validators=[DataRequired()], choices=_genres)
 IMAGE_LINK = StringField('image_link', validators=[Optional(), URL()])
 WEBSITE = StringField('website', validators=[Optional(), URL()])
 FB_LINK = StringField('facebook_link', validators=[Optional(), URL()])
