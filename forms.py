@@ -121,7 +121,7 @@ class VenueForm(FlaskForm):
     image_link = IMAGE_LINK
     website = WEBSITE
     facebook_link = FB_LINK
-    seeking = BooleanField('seeking_talent')
+    seeking_talent = BooleanField('seeking_talent')
     seeking_description = SEEK_DESC
 
 class ArtistForm(FlaskForm):
@@ -133,5 +133,5 @@ class ArtistForm(FlaskForm):
     image_link = IMAGE_LINK
     website = WEBSITE
     facebook_link = FB_LINK
-    seeking = BooleanField('seeking_venue')
+    seeking_venue = BooleanField('seeking_venue')
     seeking_description = SEEK_DESC
