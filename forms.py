@@ -99,12 +99,8 @@ SEEK_DESC = StringField('seeking_description')
 
 
 class ShowForm(FlaskForm):
-    artist_id = StringField(
-        'artist_id'
-    )
-    venue_id = StringField(
-        'venue_id'
-    )
+    artist_id = StringField('artist_id', validators=[DataRequired(), Regexp(r'\d+')])
+    venue_id = StringField('venue_id', validators=[DataRequired(), Regexp(r'\d+')])
     start_time = DateTimeField(
         'start_time',
         validators=[DataRequired()],
